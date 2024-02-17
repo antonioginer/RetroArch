@@ -1102,6 +1102,11 @@ void video_frame_rest(video_driver_state_t *video_st,
       settings_t *settings,
       retro_time_t current_time);
 
+#ifdef HAVE_MISTER //psakhis
+int video_mister_sync(retro_time_t emulationTime);
+#endif
+
+
 /**
  * video_context_driver_init:
  * @core_set_shared_context : Boolean value that tells us whether shared context
