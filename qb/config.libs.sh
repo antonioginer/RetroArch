@@ -656,8 +656,10 @@ fi
 if [ "$HAVE_CRTSWITCHRES" != no ]; then
    if [ "$HAVE_CXX11" = 'no' ]; then
       HAVE_CRTSWITCHRES=no
+      HAVE_MISTER=no
    else
       HAVE_CRTSWITCHRES=yes
+      HAVE_MISTER=yes
    fi
 fi
 

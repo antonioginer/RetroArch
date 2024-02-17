@@ -567,6 +567,15 @@ static void audio_driver_flush(
          output_frames       *= sizeof(int16_t);  /* Unit: bytes */
       }
 
+#ifdef HAVE_MISTER //psakhis
+      settings_t *settings   = config_get_ptr();
+      if (settings->bools.video_mister_enable)
+      {
+         memcpy(&audio_st->output_mister_samples_conv_buf[audio_st->output_mister_samples], output_data, output_frames << 1);
+         audio_st->output_mister_samples += output_frames;
+      }
+#endif
+
       audio_st->current_audio->write(audio_st->context_audio_data,
             output_data, output_frames * 2);
    }
@@ -632,6 +641,11 @@ bool audio_driver_init_internal(
    audio_driver_st.chunk_block_size               = AUDIO_CHUNK_SIZE_BLOCKING;
    audio_driver_st.chunk_nonblock_size            = AUDIO_CHUNK_SIZE_NONBLOCKING;
    audio_driver_st.chunk_size                     = audio_driver_st.chunk_block_size;
+
+#ifdef HAVE_MISTER //psakhis
+   audio_driver_st.output_mister_samples          = 0;
+   audio_driver_st.output_mister                  = false;
+#endif
 
 #ifdef HAVE_REWIND
    /* Needs to be able to hold full content of a full max_bufsamples
@@ -874,6 +888,12 @@ size_t audio_driver_sample_batch(const int16_t *data, size_t frames)
             (frames_remaining > (AUDIO_CHUNK_SIZE_NONBLOCKING >> 1)) ?
                   (AUDIO_CHUNK_SIZE_NONBLOCKING >> 1) : frames_remaining;
 
+#ifdef HAVE_MISTER //psakhis
+      settings_t *settings           = config_get_ptr();
+      if (settings->bools.video_mister_enable && !(runloop_flags & RUNLOOP_FLAG_PAUSED) && (audio_st->flags & AUDIO_FLAG_ACTIVE))
+         audio_st->output_mister = false;
+#endif
+
       if (    record_st->data
            && record_st->driver
            && record_st->driver->push_audio)
@@ -901,6 +921,10 @@ size_t audio_driver_sample_batch(const int16_t *data, size_t frames)
       data             += frames_to_write << 1;
    }
    while (frames_remaining > 0);
+
+#ifdef HAVE_MISTER //psakhis
+   audio_st->output_mister = true;
+#endif
 
    return frames;
 }
