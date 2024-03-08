@@ -3916,7 +3916,8 @@ void video_driver_frame(const void *data, unsigned width,
    {
 
 #ifdef HAVE_MISTER //psakhis
-      mister_draw(video_st, data, width, height, pitch);
+      if (config_get_ptr()->bools.video_mister_enable)
+         mister_draw(video_st, data, width, height, pitch);
 #endif
 
       if (video_st->current_video->frame(
