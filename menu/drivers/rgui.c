@@ -59,6 +59,10 @@
 #include "../../gfx/drivers_font_renderer/bitmapfont_6x10.h"
 #endif
 
+#ifdef HAVE_MISTER
+#include "gfx/gfx_mister.h"
+#endif
+
 /* Thumbnail additions */
 #include "../../gfx/gfx_thumbnail_path.h"
 #include "../../tasks/tasks_internal.h"
