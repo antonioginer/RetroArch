@@ -202,6 +202,9 @@
 #ifdef HAVE_CRTSWITCHRES
 #include "gfx/video_crt_switch.h"
 #endif
+#ifdef HAVE_MISTER
+#include "gfx/gfx_mister.h"
+#endif
 #ifdef HAVE_BLUETOOTH
 #include "bluetooth/bluetooth_driver.h"
 #endif
@@ -4095,7 +4098,7 @@ void runloop_event_deinit_core(void)
    runloop_st->current_core.flags &= ~RETRO_CORE_FLAG_SYMBOLS_INITED;
 
 #if defined HAVE_MISTER //psakhis
-   mister_CmdClose(); //psakhis
+   mister_close(); //psakhis
 #endif
 
    /* Restore original refresh rate, if it has been changed
@@ -6850,14 +6853,6 @@ int runloop_iterate(void)
    settings_t *settings                         = config_get_ptr();
    runloop_state_t *runloop_st                  = &runloop_state;
 
-#ifdef HAVE_MISTER //psakhis
-   if (settings->bools.video_mister_enable)
-   {
-      settings->bools.video_vsync = false;
-      settings->bools.vrr_runloop_enable = true;
-   }
-#endif
-
    bool vrr_runloop_enable                      = settings->bools.vrr_runloop_enable;
    unsigned max_users                           = settings->uints.input_max_users;
    retro_time_t current_time                    = cpu_features_get_time_usec();
@@ -7108,14 +7103,6 @@ int runloop_iterate(void)
       }
    }
 
-#ifdef HAVE_MISTER //psakhis
-   retro_time_t mister_et1 = 0;
-   if (settings->bools.video_mister_enable)
-   {
-      mister_et1 = cpu_features_get_time_usec();
-   }
-#endif
-
    {
 #ifdef HAVE_RUNAHEAD
       bool run_ahead_enabled            = settings->bools.run_ahead_enabled;
@@ -7150,15 +7137,6 @@ int runloop_iterate(void)
          runloop_st,
          slowmotion_ratio,
          current_time);
-
-#ifdef HAVE_MISTER //psakhis
-   int mister_dif = 0;
-   if (settings->bools.video_mister_enable)
-   {
-      retro_time_t mister_et2  = cpu_features_get_time_usec();
-      mister_dif = video_mister_sync(mister_et2 - mister_et1);
-   }
-#endif
 
 #ifdef HAVE_CHEEVOS
    if (cheevos_enable)
@@ -7263,14 +7241,6 @@ end:
 #endif
               || (runloop_st->flags & RUNLOOP_FLAG_PAUSED)))
    {
-
-#ifdef HAVE_MISTER //psakhis
-      if (settings->bools.video_mister_enable)
-      {
-         runloop_st->frame_limit_last_time += mister_dif;
-      }
-#endif
-
       const retro_time_t end_frame_time  = cpu_features_get_time_usec();
       const retro_time_t to_sleep_ms     = (
             (  runloop_st->frame_limit_last_time
