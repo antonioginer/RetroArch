@@ -6854,6 +6854,14 @@ int runloop_iterate(void)
    settings_t *settings                         = config_get_ptr();
    runloop_state_t *runloop_st                  = &runloop_state;
 
+#if defined HAVE_MISTER && defined HAVE_CRTSWITCHRES //psakhis
+   if (settings->bools.video_mister_enable)
+   {
+      settings->uints.crt_switch_resolution = 1;
+      settings->uints.crt_switch_resolution_super = 0;
+   }
+#endif
+
    bool vrr_runloop_enable                      = settings->bools.vrr_runloop_enable;
    unsigned max_users                           = settings->uints.input_max_users;
    retro_time_t current_time                    = cpu_features_get_time_usec();
@@ -7242,6 +7250,12 @@ end:
 #endif
               || (runloop_st->flags & RUNLOOP_FLAG_PAUSED)))
    {
+
+#ifdef HAVE_MISTER
+   if (settings->bools.video_mister_enable)
+      runloop_st->frame_limit_last_time += mister_diff_time_raster() / 10;
+#endif
+
       const retro_time_t end_frame_time  = cpu_features_get_time_usec();
       const retro_time_t to_sleep_ms     = (
             (  runloop_st->frame_limit_last_time
@@ -7269,6 +7283,11 @@ end:
 
       runloop_st->frame_limit_last_time = end_frame_time;
    }
+
+#ifdef HAVE_MISTER
+   if (settings->bools.video_mister_enable && !vrr_runloop_enable && audio_sync)
+      mister_sync();
+#endif
 
    /* Post-frame power saving sleep resting */
    if (      settings->bools.video_frame_rest
