@@ -6852,15 +6852,6 @@ int runloop_iterate(void)
 #endif
    settings_t *settings                         = config_get_ptr();
    runloop_state_t *runloop_st                  = &runloop_state;
-
-#if defined HAVE_MISTER && defined HAVE_CRTSWITCHRES //psakhis
-   if (settings->bools.video_mister_enable)
-   {
-      settings->uints.crt_switch_resolution = 1;
-      settings->uints.crt_switch_resolution_super = 0;
-   }
-#endif
-
    bool vrr_runloop_enable                      = settings->bools.vrr_runloop_enable;
    unsigned max_users                           = settings->uints.input_max_users;
    retro_time_t current_time                    = cpu_features_get_time_usec();
