@@ -287,6 +287,9 @@ input_device_driver_t *joypad_drivers[] = {
 #ifdef HAVE_TEST_DRIVERS
    &test_joypad,
 #endif
+#ifdef HAVE_MISTER //psakhis
+   &mister_joypad,
+#endif
    &null_joypad,
    NULL,
 };
@@ -541,7 +544,7 @@ float input_driver_get_sensor(
          void *current_data = input_driver_st.current_data;
          return current_driver->get_sensor_input(current_data, port, id);
       }
-      else if (sensors_enable && input_driver_st.primary_joypad && 
+      else if (sensors_enable && input_driver_st.primary_joypad &&
                input_driver_st.primary_joypad->get_sensor_input)
       {
          return input_driver_st.primary_joypad->get_sensor_input(NULL,
