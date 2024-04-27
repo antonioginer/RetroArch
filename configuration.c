@@ -1845,7 +1845,6 @@ static struct config_bool_setting *populate_settings_bool(
 
    SETTING_BOOL("crt_switch_resolution_use_custom_refresh_rate", &settings->bools.crt_switch_custom_refresh_enable, true, false, false);
    SETTING_BOOL("crt_switch_hires_menu",         &settings->bools.crt_switch_hires_menu, true, false, true);
-   SETTING_BOOL("mister_lz4",                    &settings->bools.mister_lz4, true, false, true); //psakhis
    SETTING_BOOL("mister_scanlines",              &settings->bools.mister_scanlines, true, false, true);
    SETTING_BOOL("mister_force_rgb565",           &settings->bools.mister_force_rgb565, true, false, true);
    SETTING_BOOL("mister_interlaced_fb",          &settings->bools.mister_interlaced_fb, true, true, true);
@@ -2435,6 +2434,7 @@ static struct config_uint_setting *populate_settings_uint(
    SETTING_UINT("crt_switch_resolution",         &settings->uints.crt_switch_resolution, true, DEFAULT_CRT_SWITCH_RESOLUTION, false);
    SETTING_UINT("crt_switch_resolution_super",   &settings->uints.crt_switch_resolution_super, true, DEFAULT_CRT_SWITCH_RESOLUTION_SUPER, false);
    SETTING_UINT("crt_switch_resolution",         &settings->uints.crt_switch_resolution, true, DEFAULT_CRT_SWITCH_RESOLUTION, false);
+   SETTING_UINT("mister_lz4",                    &settings->uints.mister_lz4, true, DEFAULT_MISTER_LZ4, false);
    SETTING_UINT("custom_viewport_width",         &settings->video_viewport_custom.width, false, 0 /* TODO */, false);
    SETTING_UINT("custom_viewport_height",        &settings->video_viewport_custom.height, false, 0 /* TODO */, false);
    SETTING_UINT("custom_viewport_x",             (unsigned*)&settings->video_viewport_custom.x, false, 0 /* TODO */, false);
