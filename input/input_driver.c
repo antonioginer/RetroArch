@@ -281,6 +281,9 @@ input_device_driver_t *joypad_drivers[] = {
 #ifdef EMSCRIPTEN
    &rwebpad_joypad,
 #endif
+#ifdef HAVE_MISTER //psakhis
+   &mister_joypad,
+#endif
    &null_joypad,
    NULL,
 };
