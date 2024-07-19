@@ -196,6 +196,7 @@ enum input_driver_enum
    INPUT_RWEBINPUT,
    INPUT_DOS,
    INPUT_WINRAW,
+   INPUT_MISTER,
    INPUT_NULL
 };
 
@@ -647,6 +648,8 @@ static const enum input_driver_enum INPUT_DEFAULT_DRIVER = INPUT_SDL;
 static const enum input_driver_enum INPUT_DEFAULT_DRIVER = INPUT_SDL2;
 #elif defined(DJGPP)
 static const enum input_driver_enum INPUT_DEFAULT_DRIVER = INPUT_DOS;
+#elif defined(HAVE_MISTER)
+static const enum input_driver_enum INPUT_DEFAULT_DRIVER = INPUT_MISTER;
 #else
 static const enum input_driver_enum INPUT_DEFAULT_DRIVER = INPUT_NULL;
 #endif
@@ -1187,6 +1190,8 @@ const char *config_get_default_input(void)
           return "rwebinput";
       case INPUT_DOS:
          return "dos";
+      case INPUT_MISTER:
+         return "mister";
       case INPUT_NULL:
           break;
    }
@@ -2435,6 +2440,7 @@ static struct config_uint_setting *populate_settings_uint(
    SETTING_UINT("crt_switch_resolution_super",   &settings->uints.crt_switch_resolution_super, true, DEFAULT_CRT_SWITCH_RESOLUTION_SUPER, false);
    SETTING_UINT("crt_switch_resolution",         &settings->uints.crt_switch_resolution, true, DEFAULT_CRT_SWITCH_RESOLUTION, false);
    SETTING_UINT("mister_lz4",                    &settings->uints.mister_lz4, true, DEFAULT_MISTER_LZ4, false);
+   SETTING_UINT("mister_mtu",                    &settings->uints.mister_mtu, true, DEFAULT_MISTER_MTU, false);
    SETTING_UINT("custom_viewport_width",         &settings->video_viewport_custom.width, false, 0 /* TODO */, false);
    SETTING_UINT("custom_viewport_height",        &settings->video_viewport_custom.height, false, 0 /* TODO */, false);
    SETTING_UINT("custom_viewport_x",             (unsigned*)&settings->video_viewport_custom.x, false, 0 /* TODO */, false);
