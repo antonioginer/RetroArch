@@ -364,6 +364,9 @@ input_driver_t *input_drivers[] = {
 #ifdef DJGPP
    &input_dos,
 #endif
+#ifdef HAVE_MISTER
+   &input_mister,
+#endif
    &input_null,
    NULL,
 };
