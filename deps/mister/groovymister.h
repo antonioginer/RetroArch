@@ -150,7 +150,7 @@ class GroovyMister
 
 	struct timespec m_tickStart;
 	struct timespec m_tickEnd;
-	struct timespec m_tickSync;	
+	struct timespec m_tickSync;
 	struct timespec m_tickCongestion;
 #endif
 	struct sockaddr_in m_serverAddr;
