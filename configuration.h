@@ -135,6 +135,9 @@ typedef struct settings
       int menu_xmb_title_margin;
       int menu_xmb_title_margin_horizontal_offset;
 #endif
+#ifdef HAVE_OVERLAY
+      int input_overlay_lightgun_port;
+#endif
    } ints;
 
    struct
@@ -148,6 +151,7 @@ typedef struct settings
 
       unsigned input_libretro_device[MAX_USERS];
       unsigned input_analog_dpad_mode[MAX_USERS];
+      unsigned input_device_reservation_type[MAX_USERS];
 
       unsigned input_remap_ports[MAX_USERS];
       unsigned input_remap_ids[MAX_USERS][RARCH_CUSTOM_BIND_LIST_END];
@@ -272,6 +276,7 @@ typedef struct settings
       unsigned menu_timedate_date_separator;
       unsigned gfx_thumbnails;
       unsigned menu_left_thumbnails;
+      unsigned menu_icon_thumbnails;
       unsigned gfx_thumbnail_upscale_threshold;
       unsigned menu_rgui_thumbnail_downscaler;
       unsigned menu_rgui_thumbnail_delay;
@@ -321,6 +326,12 @@ typedef struct settings
       unsigned input_overlay_show_inputs_port;
       unsigned input_overlay_dpad_diagonal_sensitivity;
       unsigned input_overlay_abxy_diagonal_sensitivity;
+      unsigned input_overlay_lightgun_trigger_delay;
+      unsigned input_overlay_lightgun_two_touch_input;
+      unsigned input_overlay_lightgun_three_touch_input;
+      unsigned input_overlay_lightgun_four_touch_input;
+      unsigned input_overlay_mouse_hold_msec;
+      unsigned input_overlay_mouse_dtap_msec;
 #endif
 
       unsigned run_ahead_frames;
@@ -341,13 +352,11 @@ typedef struct settings
       unsigned ai_service_mode;
       unsigned ai_service_target_lang;
       unsigned ai_service_source_lang;
-      unsigned ai_service_poll_delay;
-      unsigned ai_service_text_position;
-      unsigned ai_service_text_padding;
 
       unsigned core_updater_auto_backup_history_size;
       unsigned video_black_frame_insertion;
       unsigned video_bfi_dark_frames;
+      unsigned video_shader_subframes;
       unsigned video_autoswitch_refresh_rate;
       unsigned quit_on_close_content;
 
@@ -369,6 +378,12 @@ typedef struct settings
    {
       float placeholder;
       float video_aspect_ratio;
+      float video_viewport_bias_x;
+      float video_viewport_bias_y;
+#if defined(RARCH_MOBILE)
+      float video_viewport_bias_portrait_x;
+      float video_viewport_bias_portrait_y;
+#endif
       float video_refresh_rate;
       float video_autoswitch_pal_threshold;
       float crt_video_refresh_rate;
@@ -419,6 +434,9 @@ typedef struct settings
       float input_overlay_x_offset_portrait;
       float input_overlay_y_offset_portrait;
 
+      float input_overlay_mouse_speed;
+      float input_overlay_mouse_swipe_threshold;
+
       float slowmotion_ratio;
       float fastforward_ratio;
       float input_analog_deadzone;
@@ -468,6 +486,8 @@ typedef struct settings
 #ifdef ANDROID
       char input_android_physical_keyboard[255];
 #endif
+
+      char input_reserved_devices[MAX_USERS][255];
 
       char audio_device[255];
       char camera_device[255];
@@ -545,7 +565,6 @@ typedef struct settings
       char directory_input_remapping[PATH_MAX_LENGTH];
       char directory_overlay[PATH_MAX_LENGTH];
       char directory_osk_overlay[PATH_MAX_LENGTH];
-      char directory_resampler[PATH_MAX_LENGTH];
       char directory_screenshot[PATH_MAX_LENGTH];
       char directory_system[PATH_MAX_LENGTH];
       char directory_cache[PATH_MAX_LENGTH];
@@ -566,11 +585,16 @@ typedef struct settings
 #ifdef _3DS
       char directory_bottom_assets[PATH_MAX_LENGTH];
 #endif
+#ifdef HAVE_TEST_DRIVERS
+      char test_input_file_joypad[PATH_MAX_LENGTH];
+      char test_input_file_general[PATH_MAX_LENGTH];
+#endif
       char log_dir[PATH_MAX_LENGTH];
       char app_icon[PATH_MAX_LENGTH];
    } paths;
 
    bool modified;
+   bool skip_window_positions;
 
    struct
    {
@@ -599,6 +623,7 @@ typedef struct settings
       bool video_shader_watch_files;
       bool video_shader_remember_last_dir;
       bool video_shader_preset_save_reference_enable;
+      bool video_scan_subframes;
       bool video_threaded;
       bool video_font_enable;
       bool video_disable_composition;
@@ -636,7 +661,7 @@ typedef struct settings
       bool audio_rate_control;
       bool audio_fastforward_mute;
       bool audio_fastforward_speedup;
-#ifdef TARGET_OS_IOS
+#ifdef IOS
       bool audio_respect_silent_mode;
 #endif
 
@@ -667,6 +692,11 @@ typedef struct settings
       bool input_overlay_auto_rotate;
       bool input_overlay_auto_scale;
       bool input_osk_overlay_auto_scale;
+      bool input_overlay_pointer_enable;
+      bool input_overlay_lightgun_trigger_on_touch;
+      bool input_overlay_lightgun_allow_offscreen;
+      bool input_overlay_mouse_hold_to_drag;
+      bool input_overlay_mouse_dtap_to_drag;
       bool input_descriptor_label_show;
       bool input_descriptor_hide_unbound;
       bool input_all_users_control_menu;
@@ -705,6 +735,7 @@ typedef struct settings
       bool notification_show_remap_load;
       bool notification_show_config_override_load;
       bool notification_show_set_initial_disk;
+      bool notification_show_disk_control;
       bool notification_show_save_state;
       bool notification_show_fast_forward;
 #ifdef HAVE_SCREENSHOTS
@@ -831,6 +862,7 @@ typedef struct settings
       bool quick_menu_show_replay;
       bool quick_menu_show_undo_save_load_state;
       bool quick_menu_show_add_to_favorites;
+      bool quick_menu_show_add_to_playlist;
       bool quick_menu_show_start_recording;
       bool quick_menu_show_start_streaming;
       bool quick_menu_show_set_core_association;
@@ -937,6 +969,8 @@ typedef struct settings
       /* Cloud Sync */
       bool cloud_sync_enable;
       bool cloud_sync_destructive;
+      bool cloud_sync_sync_saves;
+      bool cloud_sync_sync_configs;
 
       /* Misc. */
       bool discord_enable;
@@ -983,6 +1017,7 @@ typedef struct settings
       bool game_specific_options;
       bool auto_overrides_enable;
       bool auto_remaps_enable;
+      bool initial_disk_change_enable;
       bool global_core_options;
       bool auto_shaders_enable;
 
@@ -1026,6 +1061,7 @@ typedef struct settings
       bool playlist_fuzzy_archive_match;
       bool playlist_portable_paths;
       bool playlist_use_filename;
+      bool playlist_allow_non_png;
 
       bool quit_press_twice;
       bool vibrate_on_keypress;
@@ -1054,7 +1090,7 @@ typedef struct settings
       bool android_input_disconnect_workaround;
 #endif
 
-#if defined(HAVE_COCOATOUCH) && defined(TARGET_OS_TV)
+#if defined(HAVE_COCOATOUCH)
       bool gcdwebserver_alert;
 #endif
    } bools;
@@ -1213,6 +1249,16 @@ bool config_unload_override(void);
 bool config_load_remap(const char *directory_input_remapping,
       void *data);
 
+/**
+ * config_get_autoconf_profile_filename:
+ * @device_name       : Input device name
+ * @user              : Controller number to save
+ * Fills buf with the autoconf profile file name (including driver dir if needed).
+ **/
+
+void config_get_autoconf_profile_filename(
+      const char *device_name, unsigned user,
+      char *buf, size_t len_buf);
 /**
  * config_save_autoconf_profile:
  * @device_name       : Input device name

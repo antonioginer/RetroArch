@@ -43,6 +43,10 @@ static sr_mode srm;
 /* Forward declarations */
 static void crt_adjust_sr_ini(videocrt_switch_t *p_switch);
 
+#ifdef HAVE_MISTER
+extern void mister_set_mode(sr_mode *srm); //fixme
+#endif
+
 /* Global local variables */
 static bool ini_overrides_loaded = false;
 static char core_name[NAME_MAX_LENGTH]; /* Same size as library_name on retroarch_data.h */
@@ -133,12 +137,14 @@ static void crt_switch_set_aspect(
       patched_height           = height;
    }
 
+#if !defined(HAVE_VIDEOCORE)
    sr_get_state(&state);
 
    if ((int)srm_width >= state.super_width && !srm_isstretched)
       RARCH_LOG("[CRT]: Super resolution detected. Fractal scaling @ X:%f Y:%f \n", srm_xscale, srm_yscale);
    else if (srm_isstretched && srm_width > 0 )
       RARCH_LOG("[CRT]: Resolution is stretched. Fractal scaling @ X:%f Y:%f \n", srm_xscale, srm_yscale);
+#endif
 
    scaled_width  = roundf(patched_width  * srm_xscale);
    scaled_height = roundf(patched_height * srm_yscale);

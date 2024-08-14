@@ -69,6 +69,14 @@
 #define DEFAULT_ASPECT_RATIO 1.3333f
 #endif
 
+#define DEFAULT_VIEWPORT_BIAS_X 0.5
+#define DEFAULT_VIEWPORT_BIAS_Y 0.5
+
+#if defined(RARCH_MOBILE)
+#define DEFAULT_VIEWPORT_BIAS_PORTRAIT_X 0.5
+#define DEFAULT_VIEWPORT_BIAS_PORTRAIT_Y 0.0
+#endif
+
 #if defined(GEKKO)
 #define DEFAULT_MOUSE_SCALE 1
 #endif
@@ -402,6 +410,18 @@
 /* Try to sleep the spare time after frame is presented in order to reduce vsync CPU usage. */
 #define DEFAULT_FRAME_REST false
 
+/* Duplicates frames for the purposes of running Shaders at a higher framerate
+ * than content framerate. Requires running screen at multiple of 60hz, and
+ * don't combine with Swap_interval > 1, or BFI. (Though BFI can be done in a shader
+ * with multi-frame shaders.)
+ */
+#define DEFAULT_SHADER_SUBFRAMES 1
+
+/* Divides implements basic rolling scanning of sub frames - does this simply by scrolling a 
+ * a scissor rect down the screen according to how many sub frames there are  
+ */
+#define DEFAULT_SCAN_SUBFRAMES false
+
 /* Inserts black frame(s) inbetween frames.
  * Useful for Higher Hz monitors (set to multiples of 60 Hz) who want to play 60 Hz 
  * material with CRT-like motion clarity.
@@ -603,6 +623,24 @@
 #define DEFAULT_INPUT_OVERLAY_AUTO_SCALE false
 #endif
 
+#if defined(RARCH_MOBILE)
+#define DEFAULT_INPUT_OVERLAY_POINTER_ENABLE true
+#else
+#define DEFAULT_INPUT_OVERLAY_POINTER_ENABLE false
+#endif
+
+#define DEFAULT_INPUT_OVERLAY_LIGHTGUN_PORT -1
+#define DEFAULT_INPUT_OVERLAY_LIGHTGUN_TRIGGER_ON_TOUCH true
+#define DEFAULT_INPUT_OVERLAY_LIGHTGUN_TRIGGER_DELAY 1
+#define DEFAULT_INPUT_OVERLAY_LIGHTGUN_MULTI_TOUCH_INPUT 0
+#define DEFAULT_INPUT_OVERLAY_LIGHTGUN_ALLOW_OFFSCREEN true
+#define DEFAULT_INPUT_OVERLAY_MOUSE_SPEED 1.0f
+#define DEFAULT_INPUT_OVERLAY_MOUSE_HOLD_TO_DRAG true
+#define DEFAULT_INPUT_OVERLAY_MOUSE_HOLD_MSEC 200
+#define DEFAULT_INPUT_OVERLAY_MOUSE_DTAP_TO_DRAG false
+#define DEFAULT_INPUT_OVERLAY_MOUSE_DTAP_MSEC 200
+#define DEFAULT_INPUT_OVERLAY_MOUSE_SWIPE_THRESHOLD 1.0f
+
 #ifdef UDEV_TOUCH_SUPPORT
 #define DEFAULT_INPUT_TOUCH_VMOUSE_POINTER true
 #define DEFAULT_INPUT_TOUCH_VMOUSE_MOUSE true
@@ -667,6 +705,7 @@
 #define DEFAULT_QUICK_MENU_SHOW_UNDO_SAVE_LOAD_STATE true
 #define DEFAULT_QUICK_MENU_SHOW_REPLAY false
 #define DEFAULT_QUICK_MENU_SHOW_ADD_TO_FAVORITES true
+#define DEFAULT_QUICK_MENU_SHOW_ADD_TO_PLAYLIST false
 #define DEFAULT_QUICK_MENU_SHOW_START_RECORDING true
 #define DEFAULT_QUICK_MENU_SHOW_START_STREAMING true
 #define DEFAULT_QUICK_MENU_SHOW_SET_CORE_ASSOCIATION true
@@ -856,6 +895,7 @@
 #define DEFAULT_GAME_SPECIFIC_OPTIONS true
 #define DEFAULT_AUTO_OVERRIDES_ENABLE true
 #define DEFAULT_AUTO_REMAPS_ENABLE true
+#define DEFAULT_INITIAL_DISK_CHANGE_ENABLE true
 #define DEFAULT_GLOBAL_CORE_OPTIONS false
 #define DEFAULT_AUTO_SHADERS_ENABLE true
 
@@ -1070,6 +1110,9 @@
 /* Display a notification when automatically restoring
  * at launch the last used disk of multi-disk content */
 #define DEFAULT_NOTIFICATION_SHOW_SET_INITIAL_DISK true
+
+/* Display disc control notifications */
+#define DEFAULT_NOTIFICATION_SHOW_DISK_CONTROL true
 
 /* Display save state notifications */
 #define DEFAULT_NOTIFICATION_SHOW_SAVE_STATE true
@@ -1476,6 +1519,8 @@
 
 #define DEFAULT_PLAYLIST_USE_FILENAME false
 
+#define DEFAULT_PLAYLIST_ALLOW_NON_PNG false
+
 /* Show Menu start-up screen on boot. */
 #define DEFAULT_MENU_SHOW_START_SCREEN true
 
@@ -1531,6 +1576,14 @@
 #define DEFAULT_TURBO_DEFAULT_BTN RETRO_DEVICE_ID_JOYPAD_B
 #define DEFAULT_ALLOW_TURBO_DPAD false
 
+/* Enable automatic mouse grab by default
+ * only on Android */
+#if defined(ANDROID)
+#define DEFAULT_INPUT_AUTO_MOUSE_GRAB true
+#else
+#define DEFAULT_INPUT_AUTO_MOUSE_GRAB false
+#endif
+
 #if TARGET_OS_IPHONE
 #define DEFAULT_INPUT_KEYBOARD_GAMEPAD_ENABLE false
 #else
@@ -1575,6 +1628,7 @@
 #define DEFAULT_GFX_THUMBNAILS_DEFAULT 3
 
 #define DEFAULT_MENU_LEFT_THUMBNAILS_DEFAULT 0
+#define DEFAULT_MENU_ICON_THUMBNAILS_DEFAULT 0
 
 #define DEFAULT_GFX_THUMBNAIL_UPSCALE_THRESHOLD 0
 
@@ -1650,13 +1704,17 @@
 /* Only applies to Android 7.0 (API 24) and up */
 #define DEFAULT_SUSTAINED_PERFORMANCE_MODE false
 
-#if defined(ANDROID)
+#if defined(ANDROID) || defined(IOS)
 #define DEFAULT_VIBRATE_ON_KEYPRESS true
 #else
 #define DEFAULT_VIBRATE_ON_KEYPRESS false
 #endif
 
+#if defined(IOS)
+#define DEFAULT_ENABLE_DEVICE_VIBRATION true
+#else
 #define DEFAULT_ENABLE_DEVICE_VIBRATION false
+#endif
 
 /* Defines the strength of rumble effects
  * on OpenDingux devices */
@@ -1684,6 +1742,8 @@
 
 #if defined(HAKCHI)
 #define DEFAULT_BUILDBOT_SERVER_URL "http://hakchicloud.com/Libretro_Cores/"
+#elif defined(WEBOS)
+#define DEFAULT_BUILDBOT_SERVER_URL "http://retroarch-cores.webosbrew.org/armv7a/"
 #elif defined(ANDROID)
 #if defined(ANDROID_ARM_V7)
 #define DEFAULT_BUILDBOT_SERVER_URL "http://buildbot.libretro.com/nightly/android/latest/armeabi-v7a/"
@@ -1786,13 +1846,7 @@
 
 #define DEFAULT_AI_SERVICE_MODE 1
 
-#define DEFAULT_AI_SERVICE_TEXT_POSITION 0
-#define DEFAULT_AI_SERVICE_TEXT_PADDING 5
-
 #define DEFAULT_AI_SERVICE_URL "http://localhost:4404/"
-
-#define DEFAULT_AI_SERVICE_POLL_DELAY 0
-#define MAXIMUM_AI_SERVICE_POLL_DELAY 500
 
 #if defined(HAVE_FFMPEG) || defined(HAVE_MPV)
 #define DEFAULT_BUILTIN_MEDIAPLAYER_ENABLE true

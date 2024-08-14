@@ -103,43 +103,53 @@ bool fill_pathname_application_data(char *s, size_t len)
 
 #elif defined(OSX)
    CFBundleRef bundle = CFBundleGetMainBundle();
-   bool portable = false;
    if (!bundle)
       return false;
-#if HAVE_STEAM
-   portable = true;
-#else
-   CFStringRef key = CFStringCreateWithCString(NULL, "RAPortableInstall", kCFStringEncodingUTF8);
-   CFBooleanRef val = CFBundleGetValueForInfoDictionaryKey(bundle, key);
-   if (val)
-       portable = CFBooleanGetValue(val);
-   CFRelease(val);
-   CFRelease(key);
-#endif
-   if (portable)
-   {
-       CFStringRef parent_path;
-       CFURLRef bundle_url, parent_url;
-       bundle_url  = CFBundleCopyBundleURL(bundle);
-       parent_url  = CFURLCreateCopyDeletingLastPathComponent(NULL, bundle_url);
-       parent_path = CFURLCopyFileSystemPath(parent_url, kCFURLPOSIXPathStyle);
-       CFStringGetCString(parent_path, s, len, kCFStringEncodingUTF8);
-       CFRelease(parent_path);
-       CFRelease(parent_url);
-       CFRelease(bundle_url);
-       return true;
-   }
-   else
-   {
-       const char *appdata = getenv("HOME");
 
-       if (appdata)
-       {
-           fill_pathname_join(s, appdata,
-                              "Library/Application Support/RetroArch", len);
-           return true;
-       }
+   /* get the directory containing the app */
+   CFStringRef parent_path;
+   CFURLRef bundle_url, parent_url;
+   bundle_url  = CFBundleCopyBundleURL(bundle);
+   parent_url  = CFURLCreateCopyDeletingLastPathComponent(NULL, bundle_url);
+   parent_path = CFURLCopyFileSystemPath(parent_url, kCFURLPOSIXPathStyle);
+   CFStringGetCString(parent_path, s, len, kCFStringEncodingUTF8);
+   CFRelease(parent_path);
+   CFRelease(parent_url);
+   CFRelease(bundle_url);
+
+#if HAVE_STEAM
+   return true;
+#else
+   /* if portable.txt exists next to the app then we use that directory */
+   char portable_buf[PATH_MAX_LENGTH] = {0};
+   fill_pathname_join(portable_buf, s, "portable.txt", sizeof(portable_buf));
+   if (path_is_valid(portable_buf))
+      return true;
+
+   /* if the app itself says it's portable we obey that as well */
+   CFStringRef key = CFStringCreateWithCString(NULL, "RAPortableInstall", kCFStringEncodingUTF8);
+   if (key)
+   {
+      CFBooleanRef val = CFBundleGetValueForInfoDictionaryKey(bundle, key);
+      CFRelease(key);
+      if (val)
+      {
+         bool portable = CFBooleanGetValue(val);
+         CFRelease(val);
+         if (portable)
+            return true;
+      }
    }
+
+   /* otherwise we use ~/Library/Application Support/RetroArch */
+   const char *appdata = getenv("HOME");
+   if (appdata)
+   {
+      fill_pathname_join(s, appdata,
+                         "Library/Application Support/RetroArch", len);
+      return true;
+   }
+#endif
 #elif defined(RARCH_UNIX_CWD_ENV)
    getcwd(s, len);
    return true;
@@ -253,7 +263,7 @@ void fill_pathname_application_special(char *s,
             else
 #endif
 #if defined(HAVE_MATERIALUI) || defined(HAVE_OZONE)
-            if (     string_is_equal(menu_ident, "glui") 
+            if (     string_is_equal(menu_ident, "glui")
                   || string_is_equal(menu_ident, "ozone"))
             {
                char s4[PATH_MAX_LENGTH];
@@ -273,8 +283,8 @@ void fill_pathname_application_special(char *s,
       case APPLICATION_SPECIAL_DIRECTORY_ASSETS_SYSICONS:
          {
 #ifdef HAVE_MENU
-            settings_t *settings   = config_get_ptr();
 #if defined(HAVE_XMB) || defined(HAVE_MATERIALUI) || defined(HAVE_OZONE)
+            settings_t *settings   = config_get_ptr();
             const char *menu_ident = settings->arrays.menu_driver;
 #endif
 
@@ -311,8 +321,7 @@ void fill_pathname_application_special(char *s,
             }
             else
 #endif
-               if (len)
-               s[0] = '\0';
+               if (len) s[0] = '\0';
 #endif
          }
 

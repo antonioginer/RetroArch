@@ -494,19 +494,19 @@ void GroovyMister::CmdBlit(uint32_t frame, uint8_t field, uint16_t vCountSync, u
 		bytesToSend = m_RGBSize;
 		Send(&m_bufferSend[0], 8);
 	}
-	
+
 	if (m_doCongestionControl)
 	{
 		m_tickStart = m_tickCongestion;
 		setTimeEnd();
-		m_streamTime = DiffTime();		
+		m_streamTime = DiffTime();
 		while (m_streamTime < K_CONGESTION_TIME)
 		{
 			setTimeEnd();
 			m_streamTime = DiffTime();
 		}
 	}
-	
+
 	setTimeStart();
 	SendStream(0, bytesToSend, cSize);
 	setTimeEnd();
